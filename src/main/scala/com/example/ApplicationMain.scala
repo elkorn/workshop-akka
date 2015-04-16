@@ -12,7 +12,6 @@ import scala.concurrent.duration._
 
 object ApplicationMain extends App {
   implicit val system = ActorSystem("McBurgerSystem")
-  val master = system.actorOf(FromConfig.props(Props[Worker]), "master")
 
   // create and start our service actor
   val service = system.actorOf(Props[ApiActor], "demo-service")
