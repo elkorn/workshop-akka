@@ -47,7 +47,7 @@ class KitchenSpec extends ActorSpec {
 
       probes.foldLeft(Nil: Seq[AnyRef])((result, probe) => {
         result ++ probe.receiveN(amount(probe))
-      }) foreach ((msg) => msg should be(PrepareProduct(order.orderId)))
+      }) foreach (_ should be(PrepareProduct(order.orderId)))
     }
   }
 }
