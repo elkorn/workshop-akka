@@ -15,7 +15,6 @@ libraryDependencies ++= Seq(
   "com.wandoulabs.akka" %% "spray-websocket" % "0.1.4" excludeAll (
     ExclusionRule(organization = "io.spray")
   ),
-  "com.typesafe" %% "config" % "1.3.0-M2",
   "com.typesafe.akka" %% "akka-actor" % akkaV,
   "com.typesafe.akka" %% "akka-slf4j" % akkaV,
   "org.slf4j" % "slf4j-api" % slf4jV,
