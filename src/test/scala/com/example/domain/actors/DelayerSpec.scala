@@ -1,7 +1,5 @@
 package com.example.domain.actors
 
-import java.util.UUID
-
 import akka.actor.{ActorSystem, Props}
 import testUtils.ActorSpec
 
