@@ -12,11 +12,10 @@ class DelayerSpec extends ActorSpec(ActorSystem("DelayerSpecSystem")) {
     val delay = com.example.config.McBurger.operationalDelay
 
     "respond to messages with a delay" in {
-      val uuid: UUID = UUID.randomUUID()
       val delayer = system.actorOf(Props[Delayer])
-      delayer ! Delayer.DelayRequest(uuid)
+      delayer ! Delayer.DelayRequest
       expectNoMsg(FiniteDuration(delay.toNanos, scala.concurrent.duration.NANOSECONDS))
-      expectMsg(Delayer.DelayResponse(uuid))
+      expectMsg(Delayer.DelayResponse)
     }
   }
 }
