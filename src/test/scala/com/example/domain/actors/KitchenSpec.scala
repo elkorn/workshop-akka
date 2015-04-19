@@ -34,7 +34,7 @@ class KitchenSpec extends ActorSpec {
 
       val probes = Seq(sandwichProbe, friesProbe, saladProbe, coffeeProbe, shakeProbe, drinkProbe)
 
-      val kitchen = TestActorRef(Props(new Kitchen {
+      val kitchen = TestActorRef(Props(new Kitchen(TestProbe().ref) {
         override lazy val sandwich = sandwichProbe.ref
         override lazy val fries = friesProbe.ref
         override lazy val salad = saladProbe.ref

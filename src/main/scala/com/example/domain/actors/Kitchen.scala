@@ -5,13 +5,13 @@ import java.util.UUID
 import akka.actor.{ActorRef, Props, Actor}
 import com.example.domain.messages.{PrepareProduct, Order}
 
-class Kitchen extends Actor {
-  lazy val sandwich = context.actorOf(Props[Sandwich])
-  lazy val fries = context.actorOf(Props[Fries])
-  lazy val salad = context.actorOf(Props[Salad])
-  lazy val coffee = context.actorOf(Props[Coffee])
-  lazy val shake = context.actorOf(Props[Shake])
-  lazy val drink = context.actorOf(Props[Drink])
+class Kitchen(checkoutDesk: ActorRef) extends Actor {
+  lazy val sandwich = context.actorOf(Props(classOf[Sandwich], checkoutDesk))
+  lazy val fries = context.actorOf(Props(classOf[Fries], checkoutDesk))
+  lazy val salad = context.actorOf(Props(classOf[Salad], checkoutDesk))
+  lazy val coffee = context.actorOf(Props(classOf[Coffee], checkoutDesk))
+  lazy val shake = context.actorOf(Props(classOf[Shake], checkoutDesk))
+  lazy val drink = context.actorOf(Props(classOf[Drink], checkoutDesk))
 
   private def requestPreparationOfProducts(orderId: UUID)(worker: ActorRef, howMany: Int) =
     (1 to howMany).foreach((x) => worker ! PrepareProduct(orderId))

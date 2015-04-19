@@ -16,7 +16,8 @@ class KitchenWorkerSpec extends ActorSpec {
         val worker = system.actorOf(
           Props(classOf[KitchenWorker[TestProductPreparedMessage]],
             TestProductPreparedMessage,
-            probe.ref))
+            probe.ref,
+            TestProbe().ref))
 
         worker ! PrepareProduct(uuid)
 

@@ -11,8 +11,10 @@ import com.example.domain.messages._
 import scala.concurrent.duration
 import scala.util.Success
 
-private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](createResponse: (UUID) => ProductPrepared,
-                                                          workExecutor: ActorRef)
+private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
+                                                          createResponse: (UUID) => ProductPrepared,
+                                                          workExecutor: ActorRef,
+                                                          productReceiver: ActorRef)
   extends Actor {
   import context.dispatcher
 
@@ -27,9 +29,15 @@ private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](create
   }
 }
 
-class Fries(workExecutor: ActorRef) extends KitchenWorker(FriesReady, workExecutor)
-class Coffee(workExecutor: ActorRef) extends KitchenWorker(CoffeeReady, workExecutor)
-class Drink(workExecutor: ActorRef) extends KitchenWorker(DrinkReady, workExecutor)
-class Salad(workExecutor: ActorRef) extends KitchenWorker(SaladReady, workExecutor)
-class Sandwich(workExecutor: ActorRef) extends KitchenWorker(SandwichReady, workExecutor)
-class Shake(workExecutor: ActorRef) extends KitchenWorker(ShakeReady, workExecutor)
+class Fries(workExecutor: ActorRef, productReceiver: ActorRef) 
+  extends KitchenWorker(FriesReady, workExecutor, productReceiver)
+class Coffee(workExecutor: ActorRef, productReceiver: ActorRef) 
+  extends KitchenWorker(CoffeeReady, workExecutor, productReceiver)
+class Drink(workExecutor: ActorRef, productReceiver: ActorRef) 
+  extends KitchenWorker(DrinkReady, workExecutor, productReceiver)
+class Salad(workExecutor: ActorRef, productReceiver: ActorRef) 
+  extends KitchenWorker(SaladReady, workExecutor, productReceiver)
+class Sandwich(workExecutor: ActorRef, productReceiver: ActorRef) 
+  extends KitchenWorker(SandwichReady, workExecutor, productReceiver)
+class Shake(workExecutor: ActorRef, productReceiver: ActorRef) 
+  extends KitchenWorker(ShakeReady, workExecutor, productReceiver)
