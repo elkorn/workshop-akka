@@ -123,5 +123,25 @@ class CheckoutSpec extends ActorSpec with BeforeAndAfterEach {
         Order(uuid, 1, 0, 0, 0, 0, 0)
       )))
     }
+
+    "send order completion notification" in { 
+      val uuid = UUID.randomUUID() 
+      val order = Order(uuid,2,2,2,2,2,2) 
+
+      def sendN[Product <: OrderMessage](product: (UUID) => Product, id: UUID, n: Int) {
+        (1 to n).foreach((_) => checkout ! product(id))
+      }
+
+      checkout ! order
+      sendN(SandwichReady, uuid, 2)
+      sendN(FriesReady, uuid, 2)
+      sendN(SaladReady, uuid, 2)
+      sendN(CoffeeReady, uuid, 2)
+      sendN(DrinkReady, uuid, 2)
+      sendN(ShakeReady, uuid, 2)
+
+      receiverProbe.receiveN(11)
+      receiverProbe.expectMsg(OrderReady(order))
+    }
   }
 }
