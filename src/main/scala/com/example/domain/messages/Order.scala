@@ -17,7 +17,7 @@ case class Order(orderId: UUID,
             coffees: Int = 0,
             shakes: Int = 0) =  
          Order(
-           orderId, 
+           this.orderId, 
            this.sandwiches + sandwiches, 
            this.fries + fries, 
            this.salads + salads, 
@@ -25,6 +25,14 @@ case class Order(orderId: UUID,
            this.coffees + coffees, 
            this.shakes + shakes)
 
+    def hasAllProducts(required: Order) = 
+      sandwiches == required.sandwiches &&
+      fries == required.fries &&
+      salads == required.salads &&
+      drinks == required.drinks &&
+      coffees == required.coffees &&
+      shakes == required.shakes
+
     override def toString() = 
-      s"sandwiches: $sandwiches, fries: $fries, salads: $salads, drinks: $drinks, coffees: $coffees, shakes: $shakes"
+      s"[$orderId] sandwiches: $sandwiches, fries: $fries, salads: $salads, drinks: $drinks, coffees: $coffees, shakes: $shakes"
   }

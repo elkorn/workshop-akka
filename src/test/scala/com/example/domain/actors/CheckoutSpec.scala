@@ -8,27 +8,40 @@ import com.example.domain.messages._
 import testUtils.ActorSpec
 import scala.None
 
+import org.scalatest.BeforeAndAfterEach
 
-class CheckoutSpec extends ActorSpec {
+
+class CheckoutSpec extends ActorSpec with BeforeAndAfterEach {
+  var receiverProbe = TestProbe()
+  var checkout: TestActorRef[Checkout] = TestActorRef(new Checkout(receiverProbe.ref))
+
+  override def beforeEach() {
+    receiverProbe = TestProbe()
+    checkout = TestActorRef(new Checkout(receiverProbe.ref))
+  }
+
   "The checkout desk" should {
-    val receiverProbe = TestProbe()
-    val checkout = TestActorRef(new Checkout(receiverProbe.ref))
-    val uuid = UUID.randomUUID() 
-    val order = Order(uuid,1,2,3,4,5,6) 
-    val getStatus = GetOrderStatus(uuid)
-
     "show order status" in {
+      val uuid = UUID.randomUUID() 
+      val getStatus = GetOrderStatus(uuid)
       checkout ! getStatus
       expectMsg(OrderStatus(None))
     }
 
     "aggregate orders" in {
+      val uuid = UUID.randomUUID() 
+      val getStatus = GetOrderStatus(uuid)
+      val order = Order(uuid,1,2,3,4,5,6) 
       checkout ! order
       checkout ! getStatus
       expectMsg(OrderStatus(Some(Order(uuid,0,0,0,0,0,0))))
     }
 
-    "tracks order completion status" in {
+    "track order completion status" in {
+      val uuid = UUID.randomUUID() 
+      val getStatus = GetOrderStatus(uuid)
+      val order = Order(uuid,1,2,3,4,5,6) 
+
       def doStatusCheck[ProductReady <: OrderMessage](
           event: (UUID => ProductReady), 
           expectedState: Order) = {
@@ -59,7 +72,7 @@ class CheckoutSpec extends ActorSpec {
           drinks = 0,
           coffees = 0,
           shakes = 0))
-      
+
       doStatusCheck(SaladReady, 
         Order(
           uuid, 
@@ -99,6 +112,16 @@ class CheckoutSpec extends ActorSpec {
           drinks = 1,
           coffees = 1,
           shakes = 1))
+    }
+   
+    "send order status updates" in {
+      val uuid = UUID.randomUUID() 
+      val order = Order(uuid,1,2,3,4,5,6) 
+      checkout ! order
+      checkout ! SandwichReady(uuid)
+      receiverProbe.expectMsg(OrderStatus(Some(
+        Order(uuid, 1, 0, 0, 0, 0, 0)
+      )))
     }
   }
 }
