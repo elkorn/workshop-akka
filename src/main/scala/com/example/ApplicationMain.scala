@@ -3,9 +3,9 @@ package com.example
 import akka.actor.{ActorSystem, Props}
 import akka.io.IO
 import akka.pattern.ask
-import akka.routing.FromConfig
 import akka.util.Timeout
 import com.example.api.ApiActor
+import com.example.websocket.{WebSocket, WebSocketServiceActor}
 import spray.can.Http
 
 import scala.concurrent.duration._
@@ -14,13 +14,13 @@ object ApplicationMain extends App {
   implicit val system = ActorSystem("McBurgerSystem")
 
   // create and start our service actor
-  val service = system.actorOf(Props[ApiActor], "demo-service")
-
+  lazy val service = system.actorOf(Props[ApiActor], "demo-service")
+  lazy val monitoring = system.actorOf(Props[Monitoring])
+  lazy val websocketWithApi = system.actorOf(WebSocketServiceActor.props(WebSocket.Routes(("/status" -> monitoring)), service), "service")
   implicit val timeout = Timeout(5.seconds)
   // start a new HTTP server on port 8080 with our service actor as the handler
-  IO(Http) ? Http.Bind(service, interface = "localhost", port = 8080)
-
-  // This example app will ping pong 3 times and thereafter terminate the ActorSystem -
-  // see counter logic in PingActor
+  IO(Http) ? Http.Bind(websocketWithApi, interface = "localhost", port = 8080)
+  readLine("Hit ENTER to exit ...\n")
+  system.shutdown()
   system.awaitTermination()
 }

@@ -23,5 +23,10 @@ trait Service extends HttpService with Protocols {
           }
         }
       }
+    } ~
+    path("app") {
+      getFromResource("web/index.html")
+    } ~ {
+      getFromResourceDirectory("web")
     }
 }
