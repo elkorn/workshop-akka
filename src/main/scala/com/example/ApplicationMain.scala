@@ -7,6 +7,7 @@ import akka.util.Timeout
 import com.example.api.ApiActor
 import com.example.websocket.{WebSocket, WebSocketServiceActor}
 import spray.can.Http
+import spray.can.server.UHttp
 
 import scala.concurrent.duration._
 
@@ -19,7 +20,7 @@ object ApplicationMain extends App {
   lazy val websocketWithApi = system.actorOf(WebSocketServiceActor.props(WebSocket.Routes(("/status" -> monitoring)), service), "service")
   implicit val timeout = Timeout(5.seconds)
   // start a new HTTP server on port 8080 with our service actor as the handler
-  IO(Http) ? Http.Bind(websocketWithApi, interface = "localhost", port = 8080)
+  IO(UHttp) ? Http.Bind(websocketWithApi, interface = "localhost", port = 8080)
   readLine("Hit ENTER to exit ...\n")
   system.shutdown()
   system.awaitTermination()
