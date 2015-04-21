@@ -23,7 +23,7 @@ class WebSocketServiceWorker(
   var path: String = _
   var target: ActorRef = _
 
-  override def receive = handshakeOnRoute orElse businessLogicNoUpgrade orElse closeLogic
+  override def receive = handshakeOnRoute orElse handshaking orElse businessLogicNoUpgrade orElse closeLogic
 
   def handshakeOnRoute: Receive = {
     case msg @ websocket.HandshakeRequest(state) => {
