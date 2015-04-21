@@ -2,18 +2,15 @@ package com.example.domain.actors
 
 import java.util.UUID
 
-import akka.actor.Props
 import akka.testkit.{TestActorRef, TestProbe}
 import com.example.domain.messages._
-import testUtils.ActorSpec
-import scala.None
-
 import org.scalatest.BeforeAndAfterEach
+import testUtils.ActorSpec
 
 
 class CheckoutSpec extends ActorSpec with BeforeAndAfterEach {
-  var receiverProbe = TestProbe()
-  var checkout: TestActorRef[Checkout] = TestActorRef(new Checkout(receiverProbe.ref))
+  var receiverProbe: TestProbe = _
+  var checkout: TestActorRef[Checkout] = _
 
   override def beforeEach() {
     receiverProbe = TestProbe()

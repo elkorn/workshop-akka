@@ -7,7 +7,7 @@ class ServiceSpec extends testUtils.Spec with ScalatestRouteTest with Service {
 
   "Service" should {
     "send return a pong for GET request to ping" in {
-      Get() ~> myRoute ~> check {
+      Get() ~> serviceRoute ~> check {
         responseAs[String] should include("Say hello")
       }
     }

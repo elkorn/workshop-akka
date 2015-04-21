@@ -2,6 +2,7 @@ package com.example.domain.actors
 
 import java.util.UUID
 
+import akka.actor.SupervisorStrategy.Escalate
 import akka.actor.{Actor, ActorRef}
 import akka.pattern.ask
 import akka.util.Timeout
@@ -9,7 +10,7 @@ import com.example.config.McBurger
 import com.example.domain.messages._
 
 import scala.concurrent.duration
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
                                                           createResponse: (UUID) => ProductPrepared,
@@ -24,6 +25,7 @@ private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
       val originalSender = sender()
       (workExecutor ? Delayer.DelayRequest).onComplete {
         case Success(_) => originalSender ! createResponse(orderId)
+        case Failure(_) => Escalate
       }
     }
   }
