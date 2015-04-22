@@ -9,7 +9,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.example.config.McBurger
 import com.example.domain.messages._
-import com.example.monitoring.LifecycleInformingActor
 
 import scala.concurrent.duration
 import scala.util.{Failure, Success}
@@ -17,9 +16,8 @@ import scala.util.{Failure, Success}
 private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
                                                           createResponse: (UUID) => ProductPrepared,
                                                           workExecutor: ActorRef,
-                                                          productReceiver: ActorRef,
-                                                          domainName: String = "")
-  extends LifecycleInformingActor(domainName) {
+                                                          productReceiver: ActorRef) extends Actor {
+
   import context.dispatcher
 
   def receive = LoggingReceive {
@@ -35,14 +33,14 @@ private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
 }
 
 class Fries(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(FriesReady, workExecutor, productReceiver, "Fries")
+  extends KitchenWorker(FriesReady, workExecutor, productReceiver)
 class Coffee(workExecutor: ActorRef, productReceiver: ActorRef)
-  extends KitchenWorker(CoffeeReady, workExecutor, productReceiver, "Coffee")
+  extends KitchenWorker(CoffeeReady, workExecutor, productReceiver)
 class Drink(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(DrinkReady, workExecutor, productReceiver, "Drink")
+  extends KitchenWorker(DrinkReady, workExecutor, productReceiver)
 class Salad(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(SaladReady, workExecutor, productReceiver, "Salad")
+  extends KitchenWorker(SaladReady, workExecutor, productReceiver)
 class Sandwich(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(SandwichReady, workExecutor, productReceiver, "Sandwich")
+  extends KitchenWorker(SandwichReady, workExecutor, productReceiver)
 class Shake(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(ShakeReady, workExecutor, productReceiver, "Shake")
+  extends KitchenWorker(ShakeReady, workExecutor, productReceiver)

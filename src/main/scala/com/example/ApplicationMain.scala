@@ -9,17 +9,13 @@ import akka.util.Timeout
 import com.example.api.ApiActor
 import com.example.domain.actors.{Kitchen, Checkout}
 import com.example.domain.messages.Order
-import com.example.monitoring.Monitoring
-import com.example.websocket.{WebSocket, WebSocketServiceActor}
 import spray.can.Http
-import spray.can.server.UHttp
 
 import scala.concurrent.duration._
 
 object ApplicationMain extends App {
   implicit val system = ActorSystem("McBurgerSystem")
 
-  Monitoring(system)
   // create and start our service actor
   val service = system.actorOf(Props(classOf[ApiActor]), "api")
 

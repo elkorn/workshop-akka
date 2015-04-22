@@ -7,13 +7,13 @@ import akka.event.LoggingReceive
 import com.example.domain.messages.{PrepareProduct, Order}
 
 class Kitchen(checkoutDesk: ActorRef) extends Actor {
-  val delayer = context.actorOf(Props[Delayer])
-  val sandwich = context.actorOf(Props(classOf[Sandwich],  delayer, checkoutDesk))
-  val fries = context.actorOf(Props(classOf[Fries], delayer, checkoutDesk))
-  val salad = context.actorOf(Props(classOf[Salad], delayer, checkoutDesk))
-  val coffee = context.actorOf(Props(classOf[Coffee], delayer, checkoutDesk))
-  val shake = context.actorOf(Props(classOf[Shake], delayer, checkoutDesk))
-  val drink = context.actorOf(Props(classOf[Drink], delayer, checkoutDesk))
+  val delayer = context.actorOf(Props[Delayer], "Delayer")
+  val sandwich = context.actorOf(Props(classOf[Sandwich],  delayer, checkoutDesk), "Sandwich")
+  val fries = context.actorOf(Props(classOf[Fries], delayer, checkoutDesk), "Fries")
+  val salad = context.actorOf(Props(classOf[Salad], delayer, checkoutDesk), "Salad")
+  val coffee = context.actorOf(Props(classOf[Coffee], delayer, checkoutDesk), "Coffee")
+  val shake = context.actorOf(Props(classOf[Shake], delayer, checkoutDesk), "Shake")
+  val drink = context.actorOf(Props(classOf[Drink], delayer, checkoutDesk), "Drink")
 
   private def requestPreparationOfProducts(orderId: UUID)(worker: ActorRef, howMany: Int) =
     (1 to howMany).foreach((x) => worker ! PrepareProduct(orderId))
