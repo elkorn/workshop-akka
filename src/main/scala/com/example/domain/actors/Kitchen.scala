@@ -3,21 +3,24 @@ package com.example.domain.actors
 import java.util.UUID
 
 import akka.actor.{ActorRef, Props, Actor}
+import akka.event.LoggingReceive
 import com.example.domain.messages.{PrepareProduct, Order}
 
 class Kitchen(checkoutDesk: ActorRef) extends Actor {
-  lazy val sandwich = context.actorOf(Props(classOf[Sandwich], checkoutDesk))
-  lazy val fries = context.actorOf(Props(classOf[Fries], checkoutDesk))
-  lazy val salad = context.actorOf(Props(classOf[Salad], checkoutDesk))
-  lazy val coffee = context.actorOf(Props(classOf[Coffee], checkoutDesk))
-  lazy val shake = context.actorOf(Props(classOf[Shake], checkoutDesk))
-  lazy val drink = context.actorOf(Props(classOf[Drink], checkoutDesk))
+  val delayer = context.actorOf(Props[Delayer])
+  val sandwich = context.actorOf(Props(classOf[Sandwich],  delayer, checkoutDesk))
+  val fries = context.actorOf(Props(classOf[Fries], delayer, checkoutDesk))
+  val salad = context.actorOf(Props(classOf[Salad], delayer, checkoutDesk))
+  val coffee = context.actorOf(Props(classOf[Coffee], delayer, checkoutDesk))
+  val shake = context.actorOf(Props(classOf[Shake], delayer, checkoutDesk))
+  val drink = context.actorOf(Props(classOf[Drink], delayer, checkoutDesk))
 
   private def requestPreparationOfProducts(orderId: UUID)(worker: ActorRef, howMany: Int) =
     (1 to howMany).foreach((x) => worker ! PrepareProduct(orderId))
 
-  def receive = {
+  def receive = LoggingReceive {
     case order : Order => {
+      checkoutDesk ! order
       /*
         Appending '_' to the function execution allows treating it as a partial fn.
         The most basic way to achieve the same result would be to define it as

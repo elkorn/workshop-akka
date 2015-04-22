@@ -1,7 +1,8 @@
-package com.example
+package com.example.monitoring
 
 import akka.actor.Actor
-import com.example.LifecycleInformingActor.{Dead, Online, LifecycleMessage}
+import com.example.messages.SystemEvent
+import com.example.monitoring.LifecycleInformingActor._
 
 object LifecycleInformingActor {
   object LifecycleEventType extends Enumeration {
@@ -9,7 +10,7 @@ object LifecycleInformingActor {
     val Dead, Online = Value
   }
 
-  trait LifecycleMessage {
+  trait LifecycleMessage extends SystemEvent {
     val domainName: String
     val refName: String
     val address: String

@@ -3,6 +3,7 @@ package com.example.domain.actors
 import java.util.UUID
 
 import akka.actor.{ActorRef, Props, Actor}
+import akka.event.LoggingReceive
 import com.example.domain.messages._
 import scala.Option
 
@@ -42,7 +43,7 @@ class Checkout(statusReceiver: ActorRef) extends Actor {
     }
   }
 
-  def receive = {
+  def receive = LoggingReceive {
     case GetOrderStatus(orderId) => {
       if(orderStatus.isDefinedAt(orderId)) 
         sender() ! OrderStatus(Some(orderStatus(orderId)))

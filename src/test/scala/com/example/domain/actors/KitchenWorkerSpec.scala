@@ -17,7 +17,8 @@ class KitchenWorkerSpec extends ActorSpec {
           Props(classOf[KitchenWorker[TestProductPreparedMessage]],
             TestProductPreparedMessage,
             probe.ref,
-            TestProbe().ref))
+            TestProbe().ref,
+          "test"))
 
         worker ! PrepareProduct(uuid)
 
