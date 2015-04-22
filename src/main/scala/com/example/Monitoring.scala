@@ -1,10 +1,9 @@
 package com.example
 
-import akka.actor.{Actor, ActorRef, Terminated}
-import com.example.websocket.WebSocket
-import spray.http._
+import akka.actor.{ActorLogging, Actor, ActorRef, Terminated}
+import com.example.websocket.{WebSocketProducerActor, WebSocket}
 
-class Monitoring extends Actor {
+class Monitoring extends Actor with WebSocketProducerActor with ActorLogging {
   val listeners: scala.collection.mutable.Set[ActorRef] = scala.collection.mutable.Set()
 
   def receive = {

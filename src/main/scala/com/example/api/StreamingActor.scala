@@ -10,6 +10,7 @@ import spray.routing.RequestContext
 trait StreamingActor extends ComposableActor with ActorLogging {
   registerReceive({
     case x: Http.ConnectionClosed => {
+      log.warning("Stopping response streaming due to {}", x)
     }
   })
 }
@@ -20,9 +21,20 @@ trait StatusStreamingActor extends StreamingActor {
 
   val responseStart = HttpResponse(entity = HttpEntity(`application/json`, "{\"status\": {"))
 
-  def finish() {
+  def finishWith(chunk: MessageChunk) {
     request.responder ! MessageChunk("}}")
+    request.responder ! ChunkedMessageEnd
   }
+
+  registerReceive({
+    case _ => {}
+//    case ReportEvent(report) => {
+//      finishWith()
+//      request.responder ! MessageChunk(report map { case (k, v) => s""""$k":"${v.id}"""" } mkString("", ",", "}}"))
+//      request.responder ! ChunkedMessageEnd
+//      context.stop(self)
+//    }
+  })
 
   request.responder ! ChunkedResponseStart(responseStart)
   statusMonitorActor ! com.example.domain.messages.GetSystemStatus
