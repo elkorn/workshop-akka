@@ -19,6 +19,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j" % akkaV,
   "org.slf4j" % "slf4j-api" % slf4jV,
   "org.slf4j" % "slf4j-simple" % slf4jV,
+  "org.json4s" %% "json4s-native" % "3.2.11",
+  "org.mockito" % "mockito-core" % "2.0.6-beta" % "test",
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
   "io.spray" %% "spray-testkit" % sprayV % "test",
   "com.typesafe.akka" %% "akka-testkit" % akkaV % "test")

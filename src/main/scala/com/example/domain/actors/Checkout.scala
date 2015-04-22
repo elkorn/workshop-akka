@@ -3,12 +3,14 @@ package com.example.domain.actors
 import java.util.UUID
 
 import akka.actor.{ActorRef, Props, Actor}
+import akka.event.LoggingReceive
+import com.example.api.ApiMessage
 import com.example.domain.messages._
 import scala.Option
 
 case class GetOrderStatus(orderId: UUID)
 case class OrderStatus(order: Option[Order])
-case class OrderReady(order: Order)
+case class OrderReady(order: Order) extends ApiMessage
 
 class Checkout(statusReceiver: ActorRef) extends Actor {
   var orders: Map[UUID, Order]= Map()
@@ -42,7 +44,7 @@ class Checkout(statusReceiver: ActorRef) extends Actor {
     }
   }
 
-  def receive = {
+  def receive = LoggingReceive {
     case GetOrderStatus(orderId) => {
       if(orderStatus.isDefinedAt(orderId)) 
         sender() ! OrderStatus(Some(orderStatus(orderId)))
@@ -57,7 +59,6 @@ class Checkout(statusReceiver: ActorRef) extends Actor {
     }
 
     case x : OrderMessage => {
-      // TODO: mutable map?
       orderStatus = handleReady(x)(orderStatus)
       val currentOrder = orderStatus(x.orderId)
       if (isReady(currentOrder)) 

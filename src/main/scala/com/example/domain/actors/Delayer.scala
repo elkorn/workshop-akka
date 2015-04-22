@@ -4,6 +4,9 @@ import akka.actor.{Actor, ActorLogging}
 
 import com.example.config.{McBurger => config}
 
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+
 private[actors] object Delayer {
   case object DelayRequest
   case object DelayResponse
@@ -14,10 +17,14 @@ private[actors] object Delayer {
 private[actors] class Delayer extends Actor with ActorLogging {
   import Delayer._
 
+  implicit val ec: ExecutionContext = context.dispatcher
+
   def receive = {
     case DelayRequest => {
-      Thread.sleep(delayDuration.toMillis)
-      sender() ! DelayResponse
+      val originalSender = sender()
+      context.system.scheduler.scheduleOnce(500.milliseconds) {
+        originalSender ! DelayResponse
+      }
     }
   }
 }

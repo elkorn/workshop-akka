@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.actor.SupervisorStrategy.Escalate
 import akka.actor.{Actor, ActorRef}
+import akka.event.LoggingReceive
 import akka.pattern.ask
 import akka.util.Timeout
 import com.example.config.McBurger
@@ -15,16 +16,16 @@ import scala.util.{Failure, Success}
 private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
                                                           createResponse: (UUID) => ProductPrepared,
                                                           workExecutor: ActorRef,
-                                                          productReceiver: ActorRef)
-  extends Actor {
+                                                          productReceiver: ActorRef) extends Actor {
+
   import context.dispatcher
 
-  def receive = {
+  def receive = LoggingReceive {
     case PrepareProduct(orderId) => {
-      implicit val timeout = Timeout(McBurger.operationalDelay.toNanos, duration.NANOSECONDS)
+      implicit val timeout = Timeout(McBurger.operationalDelay.toNanos * 2, duration.NANOSECONDS)
       val originalSender = sender()
       (workExecutor ? Delayer.DelayRequest).onComplete {
-        case Success(_) => originalSender ! createResponse(orderId)
+        case Success(_) => productReceiver ! createResponse(orderId)
         case Failure(_) => Escalate
       }
     }
@@ -33,7 +34,7 @@ private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
 
 class Fries(workExecutor: ActorRef, productReceiver: ActorRef) 
   extends KitchenWorker(FriesReady, workExecutor, productReceiver)
-class Coffee(workExecutor: ActorRef, productReceiver: ActorRef) 
+class Coffee(workExecutor: ActorRef, productReceiver: ActorRef)
   extends KitchenWorker(CoffeeReady, workExecutor, productReceiver)
 class Drink(workExecutor: ActorRef, productReceiver: ActorRef) 
   extends KitchenWorker(DrinkReady, workExecutor, productReceiver)
