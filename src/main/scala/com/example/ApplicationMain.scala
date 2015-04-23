@@ -18,7 +18,6 @@ object ApplicationMain extends App {
 
   // create and start our service actor
   val service = system.actorOf(Props(classOf[ApiActor]), "api")
-
   val checkout = system.actorOf(Props(classOf[Checkout], service), "checkout")
   val kitchen = system.actorOf(Props(classOf[Kitchen], checkout), "kitchen")
   implicit val timeout = Timeout(5.seconds)

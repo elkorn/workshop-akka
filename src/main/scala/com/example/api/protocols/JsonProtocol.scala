@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.example.domain.actors.OrderReady
 import com.example.domain.messages.Order
+import com.example.messages.OrderRequest
 import spray.httpx.SprayJsonSupport
 import spray.json.{RootJsonFormat, JsValue, JsString, DefaultJsonProtocol, deserializationError}
 
@@ -18,6 +19,7 @@ object JsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
     }
   }
 
-  implicit val orderFormat = jsonFormat7(Order)
+  implicit val orderFormat = jsonFormat7(Order.apply)
+  implicit val orderRequestFormat = jsonFormat6(OrderRequest)
   implicit val orderReadyFormat = jsonFormat1(OrderReady)
 }
