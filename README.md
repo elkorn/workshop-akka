@@ -52,8 +52,9 @@ Pretty much everything in Akka happens within an `ExecutionContext`.
 Using a scheduler also requires an execution context, which assigns the scheduled work to a thread:
 
 ```
+println("Be there in a sec.")
 context.system.scheduler.scheduleOnce(1 second) {
-    println("Be there in a sec.")
+    println("I'm on some other thread.")
 }
 ```
 
