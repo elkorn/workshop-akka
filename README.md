@@ -1,1 +1,0 @@
-[![Build Status](https://semaphoreci.com/api/v1/projects/7144b49f-6db3-4582-a1f4-2096ab2dbf70/400466/badge.svg)](https://semaphoreci.com/elkorn/workshop-akka)
