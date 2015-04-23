@@ -3,7 +3,7 @@ package com.example.domain.actors
 import java.util.UUID
 
 import akka.actor.SupervisorStrategy.Escalate
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{ActorLogging, Actor, ActorRef}
 import akka.event.LoggingReceive
 import akka.pattern.ask
 import akka.util.Timeout
@@ -16,13 +16,13 @@ import scala.util.{Failure, Success}
 private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
                                                           createResponse: (UUID) => ProductPrepared,
                                                           workExecutor: ActorRef,
-                                                          productReceiver: ActorRef) extends Actor {
+                                                          productReceiver: ActorRef) extends Actor with ActorLogging {
 
   import context.dispatcher
 
-  def receive = LoggingReceive {
+  def receive = /*LoggingReceive*/ {
     case PrepareProduct(orderId) => {
-      implicit val timeout = Timeout(McBurger.operationalDelay.toNanos * 2, duration.NANOSECONDS)
+      implicit val timeout = Timeout(McBurger.operationalDelay * 2)
       val originalSender = sender()
       (workExecutor ? Delayer.DelayRequest).onComplete {
         case Success(_) => productReceiver ! createResponse(orderId)
