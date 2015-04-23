@@ -14,7 +14,7 @@ trait KitchenWorkers {
       classOf[Sandwich],
       context.actorOf(
         Props[Delayer],
-        "DelayerSandwich"),
+        "SandwichMachine"),
       checkoutDesk),
     "Sandwich")
   val fries = context.actorOf(
@@ -22,7 +22,7 @@ trait KitchenWorkers {
       classOf[Fries],
       context.actorOf(
         Props[Delayer],
-        "DelayerFries"),
+        "FriesMachine"),
       checkoutDesk),
     "Fries")
   val salad = context.actorOf(
@@ -30,7 +30,7 @@ trait KitchenWorkers {
       classOf[Salad],
       context.actorOf(
         Props[Delayer],
-        "DelayerSalad"),
+        "SaladMachine"),
       checkoutDesk),
     "Salad")
   val coffee = context.actorOf(
@@ -38,14 +38,14 @@ trait KitchenWorkers {
       classOf[Coffee],
       context.actorOf(
         Props[Delayer],
-        "DelayerCoffee"),
+        "CoffeeMachine"),
       checkoutDesk),
     "Coffee")
   val shake = context.actorOf(
     Props(classOf[Shake],
       context.actorOf(
         Props[Delayer],
-        "DelayerShake"),
+        "ShakeMachine"),
       checkoutDesk),
     "Shake")
   val drink = context.actorOf(
@@ -53,7 +53,7 @@ trait KitchenWorkers {
       classOf[Drink],
       context.actorOf(
         Props[Delayer],
-        "DelayerDrink"),
+        "DrinkMachine"),
       checkoutDesk),
     "Drink")
 }

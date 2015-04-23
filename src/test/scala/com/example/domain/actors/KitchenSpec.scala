@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.Props
 import akka.testkit.{TestActorRef, TestProbe}
-import com.example.domain.messages.{PrepareProduct, Order}
+import com.example.domain.messages.{Order, PrepareProduct}
 import testUtils.ActorSpec
 
 class KitchenSpec extends ActorSpec {

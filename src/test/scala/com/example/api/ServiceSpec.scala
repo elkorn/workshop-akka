@@ -6,9 +6,9 @@ class ServiceSpec extends testUtils.Spec with ScalatestRouteTest with Service {
   def actorRefFactory = system
 
   "Service" should {
-    "return a pong for GET request to ping" in {
+    "return the index page" in {
       Get() ~> serviceRoute ~> check {
-        responseAs[String] should include("Say hello")
+        responseAs[String] should include("McBurger")
       }
     }
   }

@@ -6,12 +6,13 @@ import com.example.domain.actors.OrderReady
 import com.example.domain.messages.Order
 import com.example.messages.OrderRequest
 import spray.httpx.SprayJsonSupport
-import spray.json.{RootJsonFormat, JsValue, JsString, DefaultJsonProtocol, deserializationError}
-
-
-case class Test(value: String)
+import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat, deserializationError}
 
 object JsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
+  implicit val orderFormat = jsonFormat7(Order.apply)
+  implicit val orderRequestFormat = jsonFormat6(OrderRequest)
+  implicit val orderReadyFormat = jsonFormat1(OrderReady)
+
   implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
     def write(x: UUID) = JsString(x.toString)
 
@@ -21,9 +22,4 @@ object JsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
       case x => deserializationError("Expected UUID as JsString, but got " + x)
     }
   }
-
-  implicit val orderFormat = jsonFormat7(Order.apply)
-  implicit val orderRequestFormat = jsonFormat6(OrderRequest)
-  implicit val orderReadyFormat = jsonFormat1(OrderReady)
-  implicit val testFormat = jsonFormat1(Test)
 }

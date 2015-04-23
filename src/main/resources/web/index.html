@@ -1,12 +1,21 @@
 <html>
     <head>
         <title>McBurger</title>
-        <script src="scripts/snap.svg.js"></script>
-        <script src="scripts/module.js"></script>
-        <script src="scripts/websocket.js"></script>
-        <script src="scripts/main.js"></script>
     </head>
     <body>
         <h1>McBurger</h1>
+
+        <pre>POST /order
+Content-Type: application/json
+
+{
+    "sandwiches": 1,
+    "fries": 1,
+    "salads": 1,
+    "coffees": 1,
+    "drinks": 1,
+    "shakes": 1
+}
+        </pre>
     </body>
 </html>

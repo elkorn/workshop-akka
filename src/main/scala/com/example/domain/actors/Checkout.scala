@@ -4,13 +4,12 @@ import java.util.UUID
 
 import akka.actor.{ActorRef, Props, Actor}
 import akka.event.LoggingReceive
-import com.example.api.ApiMessage
 import com.example.domain.messages._
 import scala.Option
 
 case class GetOrderStatus(orderId: UUID)
 case class OrderStatus(order: Option[Order])
-case class OrderReady(order: Order) extends ApiMessage
+case class OrderReady(order: Order)
 
 trait Aggregator[TKey, TValue] {
   var data: Map[TKey, TValue] = Map()

@@ -23,7 +23,9 @@ private[actors] class Delayer extends Actor with ActorLogging {
   def receive = {
     case DelayRequest => {
       val originalSender = sender()
-      originalSender ! DelayResponse
+      context.system.scheduler.scheduleOnce(delayDuration) {
+        originalSender ! DelayResponse
+      }
     }
   }
 }
