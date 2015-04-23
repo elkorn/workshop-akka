@@ -2,31 +2,20 @@ package com.example.api
 
 import java.util.UUID
 
-import akka.actor.{ActorRef, Actor}
-import akka.event.LoggingReceive
-import com.example.domain.actors.OrderReady
+import akka.actor.Actor
+import com.example.domain.actors.{Aggregator, OrderReady}
 import com.example.domain.messages.TrackOrder
+import spray.routing.RequestContext
 
-class OrderStatusDispatcher extends Actor {
+class OrderStatusDispatcher extends Actor with Aggregator[UUID, RequestContext] {
 
-  def dispatch(
-    readyEvent: OrderReady,
-    sender: ActorRef) =
-    sender ! readyEvent
+  import com.example.api.protocols.JsonProtocol._
 
-  def waitForTrackingRequest = LoggingReceive {
-    case TrackOrder(order) =>
-      context.become(waitForTrackingResponse(order.orderId, sender()))
+  def receive = {
+    case TrackOrder(order, request) =>
+      push(order.orderId, request)
+
+    case OrderReady(order) if has(order.orderId) =>
+      pop(order.orderId).complete(order)
   }
-
-  def waitForTrackingResponse(
-    orderId: UUID,
-    requestSender: ActorRef) =
-    LoggingReceive {
-      case x: OrderReady if x.order.orderId == orderId =>
-        dispatch(x, requestSender)
-        context.stop(self)
-    }
-
-  def receive = waitForTrackingRequest
 }

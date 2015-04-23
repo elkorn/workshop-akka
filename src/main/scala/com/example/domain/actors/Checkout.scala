@@ -12,12 +12,30 @@ case class GetOrderStatus(orderId: UUID)
 case class OrderStatus(order: Option[Order])
 case class OrderReady(order: Order) extends ApiMessage
 
-class Checkout(statusReceiver: ActorRef) extends Actor {
-  var orders: Map[UUID, Order]= Map()
+trait Aggregator[TKey, TValue] {
+  var data: Map[TKey, TValue] = Map()
+
+  def push(key: TKey, value: TValue) =
+    data = data + (key -> value)
+
+  def peek(key: TKey): TValue =
+    data(key)
+
+  def has(key: TKey): Boolean =
+    data.isDefinedAt(key)
+
+  def pop(key: TKey): TValue = {
+    val result = peek(key)
+    data -= key
+    result
+  }
+}
+
+class Checkout(statusReceiver: ActorRef) extends Actor with Aggregator[UUID, Order] {
   var orderStatus: Map[UUID, Order]= Map()
 
   def isReady(order: Order): Boolean =     
-    order.hasAllProducts(orders(order.orderId))
+    order.hasAllProducts(peek(order.orderId))
 
   def handleReady[Product <: OrderMessage]
       (product: Product)
@@ -46,7 +64,7 @@ class Checkout(statusReceiver: ActorRef) extends Actor {
 
   def receive = LoggingReceive {
     case GetOrderStatus(orderId) => {
-      if(orderStatus.isDefinedAt(orderId)) 
+      if(has(orderId))
         sender() ! OrderStatus(Some(orderStatus(orderId)))
       else 
         sender() ! OrderStatus(None)
@@ -55,14 +73,16 @@ class Checkout(statusReceiver: ActorRef) extends Actor {
     case order: Order => {
       orderStatus = orderStatus + (order.orderId -> 
         Order(order.orderId, 0,0,0,0,0,0))
-      orders = orders + (order.orderId -> order)
+      push(order.orderId, order)
     }
 
     case x : OrderMessage => {
       orderStatus = handleReady(x)(orderStatus)
       val currentOrder = orderStatus(x.orderId)
-      if (isReady(currentOrder)) 
-        statusReceiver ! OrderReady(currentOrder)
+      if (isReady(currentOrder)) {
+        orderStatus -= x.orderId
+        statusReceiver ! OrderReady(pop(x.orderId))
+      }
       else 
         statusReceiver ! OrderStatus(Some(currentOrder))
     }
