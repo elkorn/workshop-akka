@@ -2,36 +2,70 @@ package com.example.domain.actors
 
 import java.util.UUID
 
-import akka.actor.{ActorRef, Props, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.event.LoggingReceive
-import com.example.domain.messages.{PrepareProduct, Order}
+import com.example.domain.messages.{Order, PrepareProduct}
 
-class Kitchen(checkoutDesk: ActorRef) extends Actor {
-  val delayer = context.actorOf(Props[Delayer], "Delayer")
-  val sandwich = context.actorOf(Props(classOf[Sandwich],  delayer, checkoutDesk), "Sandwich")
-  val fries = context.actorOf(Props(classOf[Fries], delayer, checkoutDesk), "Fries")
-  val salad = context.actorOf(Props(classOf[Salad], delayer, checkoutDesk), "Salad")
-  val coffee = context.actorOf(Props(classOf[Coffee], delayer, checkoutDesk), "Coffee")
-  val shake = context.actorOf(Props(classOf[Shake], delayer, checkoutDesk), "Shake")
-  val drink = context.actorOf(Props(classOf[Drink], delayer, checkoutDesk), "Drink")
+trait KitchenWorkers {
+  _: Actor =>
+  val checkoutDesk: ActorRef
+  val sandwich = context.actorOf(
+    Props(
+      classOf[Sandwich],
+      context.actorOf(
+        Props[Delayer],
+        "DelayerSandwich"),
+      checkoutDesk),
+    "Sandwich")
+  val fries = context.actorOf(
+    Props(
+      classOf[Fries],
+      context.actorOf(
+        Props[Delayer],
+        "DelayerFries"),
+      checkoutDesk),
+    "Fries")
+  val salad = context.actorOf(
+    Props(
+      classOf[Salad],
+      context.actorOf(
+        Props[Delayer],
+        "DelayerSalad"),
+      checkoutDesk),
+    "Salad")
+  val coffee = context.actorOf(
+    Props(
+      classOf[Coffee],
+      context.actorOf(
+        Props[Delayer],
+        "DelayerCoffee"),
+      checkoutDesk),
+    "Coffee")
+  val shake = context.actorOf(
+    Props(classOf[Shake],
+      context.actorOf(
+        Props[Delayer],
+        "DelayerShake"),
+      checkoutDesk),
+    "Shake")
+  val drink = context.actorOf(
+    Props(
+      classOf[Drink],
+      context.actorOf(
+        Props[Delayer],
+        "DelayerDrink"),
+      checkoutDesk),
+    "Drink")
+}
 
-  private def requestPreparationOfProducts(orderId: UUID)(worker: ActorRef, howMany: Int) =
-    (1 to howMany).foreach((x) => worker ! PrepareProduct(orderId))
-
+class Kitchen(val checkoutDesk: ActorRef) extends Actor with KitchenWorkers {
   def receive = LoggingReceive {
-    case order : Order => {
+    case order: Order => {
       checkoutDesk ! order
       /*
         Appending '_' to the function execution allows treating it as a partial fn.
-        The most basic way to achieve the same result would be to define it as
-
-          def requestPreparationOfProducts(orderId: UUID): (ActorRef, Int) => Unit =  {
-            (worker, howMany) => {
-              ...
-            }
-          }
        */
-      val prepare = requestPreparationOfProducts(order.orderId)_
+      val prepare = requestPreparationOfProducts(order.orderId) _
       prepare(sandwich, order.sandwiches)
       prepare(fries, order.fries)
       prepare(salad, order.salads)
@@ -40,4 +74,10 @@ class Kitchen(checkoutDesk: ActorRef) extends Actor {
       prepare(drink, order.drinks)
     }
   }
+
+  private def requestPreparationOfProducts(orderId: UUID)
+    (
+      worker: ActorRef,
+      howMany: Int) =
+    (1 to howMany).foreach((x) => worker ! PrepareProduct(orderId))
 }
