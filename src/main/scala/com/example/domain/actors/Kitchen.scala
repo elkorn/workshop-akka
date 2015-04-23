@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.LoggingReceive
-import com.example.domain.messages.{Order, PrepareProduct}
+import com.example.domain.messages.{KickTheBucket, Order, PrepareProduct}
 
 trait KitchenWorkers {
   _: Actor =>
@@ -73,6 +73,8 @@ class Kitchen(val checkoutDesk: ActorRef) extends Actor with KitchenWorkers {
       prepare(shake, order.shakes)
       prepare(drink, order.drinks)
     }
+
+    case KickTheBucket => throw new Error("BLAARGH!")
   }
 
   private def requestPreparationOfProducts(orderId: UUID)
