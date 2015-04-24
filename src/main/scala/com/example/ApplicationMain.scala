@@ -34,20 +34,20 @@ object ApplicationMain extends App {
     case _ => Resume
   }
 
-  val kitchen = system.actorOf(RoundRobinPool(3, supervisorStrategy = resumeStrategy).props(routeeProps = Props(classOf[Kitchen], checkout)))
+  val kitchen = system.actorOf(RoundRobinPool(3, supervisorStrategy = resumeStrategy).props(routeeProps = Props(classOf[Kitchen], checkout)), "kitchen")
 
   def startApi(): Unit = {
     val service = system.actorOf(Props(classOf[ApiActor], statusDispatcher, kitchen), "api")
     IO(Http) ? Http.Bind(service, interface = "localhost", port = 8080)
   }
 
-  println("=== SENDING POISON PILL ===")
   // Stop all routees and then the router.
 //  kitchen ! PoisonPill
 
   // Stop all routees.
-//  kitchen ! Broadcast(Kill)
+//  kitchen ! Kill
+
   kitchen ! KickTheBucket
 
-  //  startApi()
+//    startApi()
 }
