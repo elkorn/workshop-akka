@@ -34,7 +34,8 @@ class KitchenSpec extends ActorSpec {
 
       val probes = Seq(sandwichProbe, friesProbe, saladProbe, coffeeProbe, shakeProbe, drinkProbe)
 
-      val kitchen = TestActorRef(Props(new Kitchen(TestProbe().ref) {
+      val checkoutProbe = TestProbe()
+      val kitchen = TestActorRef(Props(new Kitchen(checkoutProbe.ref) {
         override val sandwich = sandwichProbe.ref
         override val fries = friesProbe.ref
         override val salad = saladProbe.ref
@@ -44,6 +45,8 @@ class KitchenSpec extends ActorSpec {
       }))
 
       kitchen ! order
+
+      checkoutProbe.expectMsg(order)
 
       probes.foldLeft(Nil: Seq[AnyRef])((result, probe) => {
         result ++ probe.receiveN(amount(probe))

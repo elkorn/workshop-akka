@@ -36,7 +36,7 @@ class Checkout(statusReceiver: ActorRef) extends Actor with Aggregator[UUID, Ord
   def isReady(order: Order): Boolean =     
     order.hasAllProducts(peek(order.orderId))
 
-  def handleReady[Product <: OrderMessage]
+  def handleReady[Product <: ProductReadyEvent]
       (product: Product)
       (orderStatus: Map[UUID, Order]): 
     Map[UUID, Order] = {
@@ -75,7 +75,7 @@ class Checkout(statusReceiver: ActorRef) extends Actor with Aggregator[UUID, Ord
       push(order.orderId, order)
     }
 
-    case x : OrderMessage => {
+    case x : ProductReadyEvent => {
       orderStatus = handleReady(x)(orderStatus)
       val currentOrder = orderStatus(x.orderId)
       if (isReady(currentOrder)) {
