@@ -168,6 +168,6 @@ There are "TODO [WORKSHOP]" comments in places where there is something that nee
 
 You're done when the following is true:
 - All the tests are green (`sbt test`).
-- When you run the app (`sbt run`), you can post a JSON like `{ "sandwiches": 1, "fries": 1, "salads": 1, "coffees": 1, "shakes": 1, "drinks": 1 }` to http://localhost:8080/orders and get a response containing an order. (this info is available when you open localhost:8080 in the browser)
+- When you run the app (`sbt run`), you can post a JSON like `{ "sandwiches": 1, "fries": 1, "salads": 1, "coffees": 1, "shakes": 1, "drinks": 1 }` to `http://localhost:8080/orders` and get a response containing an order. (this info is available when you open `http://localhost:8080/` in the browser)
 
 **If you have any questions or are facing any difficulties, please speak up as I understand that this material might be confusing at first glance.**
