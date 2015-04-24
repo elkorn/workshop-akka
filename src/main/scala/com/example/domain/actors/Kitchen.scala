@@ -9,51 +9,44 @@ import com.example.domain.messages.{Order, PrepareProduct}
 trait KitchenWorkers {
   _: Actor =>
   val checkoutDesk: ActorRef
+  def delayer(name: String): ActorRef =
+    context.actorOf(
+      Props[Delayer],
+      name)
+  // TODO [WORKSHOP] Use the names of the worker classes that you have defined.
   val sandwich = context.actorOf(
     Props(
-      classOf[Sandwich],
-      context.actorOf(
-        Props[Delayer],
-        "SandwichMachine"),
+      classOf[YourSandwichCreatorTypeHere],
+      delayer("SandwichMachine"),
       checkoutDesk),
     "Sandwich")
   val fries = context.actorOf(
     Props(
-      classOf[Fries],
-      context.actorOf(
-        Props[Delayer],
-        "FriesMachine"),
+      classOf[YourFriesCreatorTypeHere],
+      delayer("FriesMachine"),
       checkoutDesk),
     "Fries")
   val salad = context.actorOf(
     Props(
-      classOf[Salad],
-      context.actorOf(
-        Props[Delayer],
-        "SaladMachine"),
+      classOf[YourSaladCreatorTypeHere],
+      delayer("SaladMachine"),
       checkoutDesk),
     "Salad")
   val coffee = context.actorOf(
     Props(
-      classOf[Coffee],
-      context.actorOf(
-        Props[Delayer],
-        "CoffeeMachine"),
+      classOf[YourCoffeeCreatorTypeHere],
+      delayer("CoffeeMachine"),
       checkoutDesk),
     "Coffee")
   val shake = context.actorOf(
-    Props(classOf[Shake],
-      context.actorOf(
-        Props[Delayer],
-        "ShakeMachine"),
+    Props(classOf[YourShakeCreatorTypeHere],
+      delayer("ShakeMachine"),
       checkoutDesk),
     "Shake")
   val drink = context.actorOf(
     Props(
-      classOf[Drink],
-      context.actorOf(
-        Props[Delayer],
-        "DrinkMachine"),
+      classOf[YourDrinkCreatorTypeHere],
+      delayer("DrinkMachine"),
       checkoutDesk),
     "Drink")
 }
@@ -61,17 +54,12 @@ trait KitchenWorkers {
 class Kitchen(val checkoutDesk: ActorRef) extends Actor with KitchenWorkers {
   def receive = LoggingReceive {
     case order: Order => {
-      checkoutDesk ! order
       /*
         Appending '_' to the function execution allows treating it as a partial fn.
+        `prepare` is of type (ActorRef, Int) => Unit.
        */
       val prepare = requestPreparationOfProducts(order.orderId) _
-      prepare(sandwich, order.sandwiches)
-      prepare(fries, order.fries)
-      prepare(salad, order.salads)
-      prepare(coffee, order.coffees)
-      prepare(shake, order.shakes)
-      prepare(drink, order.drinks)
+      // TODO [WORKSHOP] tell your minions to make the products! The checkout desk also needs to know that the new order has been accepted, sicne it will be receiving all the sandwiches etc. and packing them into colorful boxes.
     }
   }
 

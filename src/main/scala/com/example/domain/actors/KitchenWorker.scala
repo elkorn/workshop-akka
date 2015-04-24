@@ -23,7 +23,6 @@ private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
   def receive = LoggingReceive {
     case PrepareProduct(orderId) => {
       implicit val timeout = Timeout(McBurger.operationalDelay.toNanos * 2, duration.NANOSECONDS)
-      val originalSender = sender()
       (workExecutor ? Delayer.DelayRequest).onComplete {
         case Success(_) => productReceiver ! createResponse(orderId)
         case Failure(_) => Escalate
@@ -32,15 +31,5 @@ private[actors] class KitchenWorker[ProductPrepared <: ProductReadyEvent](
   }
 }
 
-class Fries(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(FriesReady, workExecutor, productReceiver)
-class Coffee(workExecutor: ActorRef, productReceiver: ActorRef)
-  extends KitchenWorker(CoffeeReady, workExecutor, productReceiver)
-class Drink(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(DrinkReady, workExecutor, productReceiver)
-class Salad(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(SaladReady, workExecutor, productReceiver)
-class Sandwich(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(SandwichReady, workExecutor, productReceiver)
-class Shake(workExecutor: ActorRef, productReceiver: ActorRef) 
-  extends KitchenWorker(ShakeReady, workExecutor, productReceiver)
+// TODO [WORKSHOP] Define classes that extends the KitchenWorker trait so that there is somebody to prepare Sandwiches, Fries, Salads, Coffees, Drinks and Shakes. ;)
+// HINT: Check com.example.domain.messages.KitchenEvents to see what you're dealing with.

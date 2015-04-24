@@ -125,6 +125,8 @@ class DataGenerator extends Actor {
         case GimmeData => {
             val originalSender = sender() // Remember the scheduler example?
             context.system.scheduler.scheduleOnce(1 second) {
+                // Everything in this closure happens on another thread.
+                // DO NOT close over actor state here!!!!
                 originalSender ! Data(generateData ())
             }
         }
@@ -138,13 +140,34 @@ class DataProxy(dataGenerator: ActorRef) extends Actor {
             (dataGenerator ? GimmeData)
                 .mapTo[Data]
                 .pipeTo(sender())
+            // You could also do
+            // dataGenerator forward GimmeData
+
         }
     }
 }
 ```
+
+The `pipeTo` pattern covers up responding to the sender in a thread-safe way.
+If possible, always use `pipeTo` when dealing with futures inside actors.
+If that's not possible for whatever reason, use the `originalSender` trick.
 
 While `ask` is useful for some purposes (e.g. queries from the REST API level), it's generally considered a good practice to avoid having too much of it in your application.
 
 This is mainly due to the fact that failures happening 'underneath' an `ask` get covered with an `AskTimeoutException` instead of being escalated directly.
 Also, each `ask` spawns an anonymous actor underneath to handle the execution, which is a bit more bloated than just using a `!`.
 
+# The exercise
+
+We are going to implement a restaurant system, inspired by https://lostechies.com/jimmybogard/2013/03/11/saga-implementation-patterns-observer/ (I'd like to thank @arturopala for the idea).
+The structure will be similar to this:
+
+![Restaurant](http://lostechies.com/jimmybogard/files/2013/03/image_thumb2.png)
+
+There are "TODO [WORKSHOP]" comments in places where there is something that needs to be filled out.
+
+You're done when the following is true:
+- All the tests are green (`sbt test`).
+- When you run the app (`sbt run`), you can post a JSON like `{ "sandwiches": 1, "fries": 1, "salads": 1, "coffees": 1, "shakes": 1, "drinks": 1 }` to http://localhost:8080/orders and get a response containing an order. (this info is available when you open localhost:8080 in the browser)
+
+**If you have any questions or are facing any difficulties, please speak up as I understand that this material might be confusing at first glance.**

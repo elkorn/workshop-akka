@@ -33,14 +33,10 @@ trait Aggregator[TKey, TValue] {
 class Checkout(statusReceiver: ActorRef) extends Actor with Aggregator[UUID, Order] {
   var orderStatus: Map[UUID, Order]= Map()
 
-  def isReady(order: Order): Boolean =     
+  def isReady(order: Order): Boolean =
     order.hasAllProducts(peek(order.orderId))
 
-  def handleReady[Product <: OrderMessage]
-      (product: Product)
-      (orderStatus: Map[UUID, Order]): 
-    Map[UUID, Order] = {
-
+  def handleReady[Product <: ProductReadyEvent](product: Product, orderStatus: Map[UUID, Order]): Map[UUID, Order] = {
     if (!orderStatus.isDefinedAt(product.orderId)) orderStatus
     else {
       val order = orderStatus(product.orderId)
@@ -62,28 +58,7 @@ class Checkout(statusReceiver: ActorRef) extends Actor with Aggregator[UUID, Ord
   }
 
   def receive = LoggingReceive {
-    case GetOrderStatus(orderId) => {
-      if(has(orderId))
-        sender() ! OrderStatus(Some(orderStatus(orderId)))
-      else 
-        sender() ! OrderStatus(None)
-    }
-
-    case order: Order => {
-      orderStatus = orderStatus + (order.orderId -> 
-        Order(order.orderId, 0,0,0,0,0,0))
-      push(order.orderId, order)
-    }
-
-    case x : OrderMessage => {
-      orderStatus = handleReady(x)(orderStatus)
-      val currentOrder = orderStatus(x.orderId)
-      if (isReady(currentOrder)) {
-        orderStatus -= x.orderId
-        statusReceiver ! OrderReady(pop(x.orderId))
-      }
-      else 
-        statusReceiver ! OrderStatus(Some(currentOrder))
-    }
+    // TODO [WORKSHOP] Wire this up! See the CheckoutSpec for guidance. This actor should respond to the following messages: GetOrderStatus, Order and ProductReadyEvent (see com.example.domain.messages)
+    case _ => {}
   }
 }
