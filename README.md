@@ -1,6 +1,10 @@
 # Actors and messages
 
+The actor concept was born in 1973 thanks to Carl Hewitt.
+The actor model provides an abstraction layer over concurrent and distributed processing.
+
 An actor is the most basic unit performing work in Akka.
+The API of Akka's actors has borrowed some syntax from Erlang (which has the actor model baked into the language since the 80s).
 
 Its main job is to receive and send messages.
 
@@ -42,7 +46,7 @@ class Dog extends Actor {
 ```
 
 The only place where you deal with an actual `Actor` instance is *where you create code for it*.
-Everywhere else, you are dealing with `ActorRef`s. It's very important, since `ActorRef`s are the cogs within Akka's machinery.
+Everywhere else, you are dealing with `ActorRef`s. It's very important, since `ActorRef`s are the cogs within Akka's machinery - their primary role is to provide support for sending and receiving messages.
 
 ![Bigger picture](ActorRef.png)
 
@@ -52,10 +56,95 @@ Pretty much everything in Akka happens within an `ExecutionContext`.
 Using a scheduler also requires an execution context, which assigns the scheduled work to a thread:
 
 ```
+import scala.concurrent.duration._
+
 println("Be there in a sec.")
 context.system.scheduler.scheduleOnce(1 second) {
     println("I'm on some other thread.")
 }
 ```
 
-![Lifecycle](http://doc.akka.io/docs/akka/snapshot/_images/actor_lifecycle1.png)
+## The ActorSystem
+
+Every actor you create resides in an `ActorSystem`. It serves as the root of its actor hierarchy.
+Apart from that, it provides facilities and functions for actors residing within it:
+- System configuration
+- The default `Scheduler` and `Dispatcher` (along with an `ExecutionContext`)
+- A generally accessible `EventStream`, to which you can publish and subscribe messages
+- A `deadLetters` actor (more on this in the `routing` and `supervision` branches)
+- An `actorSelection(actorPath: String|ActorPath)` method, with which references to actors running within the system can be obtained.
+- Functions for shutting down the system as well as its resident actors.
+
+## So how do you actually start with this?
+
+It's pretty simple:
+```
+import akka.actor.{ActorSystem, Props, ActorRef}
+
+case class Message(value: String)
+
+class PingActor(pong: ActorRef) extends Actor {
+    pong ! Message("Ping!")
+
+    def receive = {
+        case Message(v) => sender() ! Message(v + " Ping!")
+    }
+}
+
+class PongActor extends Actor {
+    def receive = {
+        case Message(v) => sender() ! Message(v + " Pong!")
+    }
+}
+
+object Foo extends App {
+ implicit val system = ActorSystem("FooSystem")
+ val pong = system.actorOf(Props[Pong], name = "pong")
+ val ping = system.actorOf(Props(classOf[Ping], pong), name = "ping")
+}
+```
+
+## Communication patterns
+
+You've seen `!` already - it's called `tell`.
+
+There is a different pattern, called `ask` or `?`, that behaves a bit differently (and should be used with more caution).
+If we were to use this pattern in our ping pong example:
+
+```
+import akka.pattern.{ask, pipe};
+import scala.concurrent.duration._;
+
+case object GimmeData
+case class Data(value: Int)
+
+class DataGenerator extends Actor {
+    def generateData() = 42
+
+    def receive = {
+        case GimmeData => {
+            val originalSender = sender() // Remember the scheduler example?
+            context.system.scheduler.scheduleOnce(1 second) {
+                originalSender ! Data(generateData ())
+            }
+        }
+    }
+}
+
+class DataProxy(dataGenerator: ActorRef) extends Actor {
+    implicit val timeout = Timeout(5 seconds)
+    def receive = {
+        case GimmeData => {
+            (dataGenerator ? GimmeData)
+                .mapTo[Data]
+                .pipeTo(sender())
+        }
+    }
+}
+```
+
+While `ask` is useful for some purposes (e.g. queries from the REST API level), it's generally considered a good practice to avoid having too much of it in your application.
+
+This is mainly due to the fact that failures happening 'underneath' an `ask` get covered with an `AskTimeoutException` instead of being escalated directly.
+Also, each `ask` spawns an anonymous actor underneath to handle the execution, which is a bit more bloated than just using a `!`.
+
